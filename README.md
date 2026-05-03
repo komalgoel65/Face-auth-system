@@ -25,7 +25,7 @@ A real-time face recognition and liveness detection web application built for **
 
 ### Meter Reading Form
 
-![Meter Reading](screenshots/Meter_reading.png)
+![Meter Reading](screenshots/Meter_Reading.png)
 
 ---
 
