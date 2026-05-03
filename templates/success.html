@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Authenticated!</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #0f0f1a;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .card {
+        text-align: center;
+      }
+      .tick {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        animation: pop 0.5s ease;
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(0);
+        }
+        80% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      h1 {
+        color: #00ff88;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+      p {
+        color: #aaa;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+      }
+      .name {
+        color: #00e5ff;
+        font-weight: bold;
+      }
+      .timer {
+        color: #555;
+        font-size: 0.9rem;
+        margin-bottom: 30px;
+      }
+      .btn {
+        padding: 15px 40px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1rem;
+        display: inline-block;
+        background: #00e5ff;
+        color: #0f0f1a;
+        transition: 0.3s;
+      }
+      .btn:hover {
+        transform: translateY(-3px);
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="tick">✅</div>
+      <h1>Authentication Successful!</h1>
+      <p>Welcome, <span class="name">{{ name }}</span></p>
+      <p class="timer" id="timer">
+        Redirecting to meter reading form in 3 seconds...
+      </p>
+      <a href="/meter_reading" class="btn">📋 Submit Meter Reading →</a>
+    </div>
+
+    <script>
+      let count = 3;
+      const timer = document.getElementById("timer");
+      const interval = setInterval(() => {
+        count--;
+        timer.textContent = `Redirecting to meter reading form in ${count} seconds...`;
+        if (count <= 0) {
+          clearInterval(interval);
+          window.location.href = "/meter_reading";
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

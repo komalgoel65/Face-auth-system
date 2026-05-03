@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Face Auth System</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #0f0f1a;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        text-align: center;
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #00e5ff;
+      }
+      p {
+        color: #aaa;
+        margin-bottom: 40px;
+        font-size: 1.1rem;
+      }
+      .section-title {
+        color: #aaa;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 12px;
+      }
+      .buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 30px;
+      }
+      .divider {
+        border: none;
+        border-top: 1px solid #2a2a3e;
+        margin: 20px auto;
+        width: 300px;
+      }
+      a.btn {
+        padding: 15px 35px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: 0.3s;
+        display: inline-block;
+      }
+      .btn-primary {
+        background: #00e5ff;
+        color: #0f0f1a;
+      }
+      .btn-secondary {
+        border: 2px solid #00e5ff;
+        color: #00e5ff;
+      }
+      .btn-admin {
+        border: 2px solid #7c3aed;
+        color: #7c3aed;
+      }
+      a.btn:hover {
+        transform: translateY(-3px);
+        opacity: 0.85;
+      }
+      .admin-note {
+        color: #555;
+        font-size: 0.8rem;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 Face Auth System</h1>
+      <p>Liveness Detection & Face Recognition for Field Authentication</p>
+
+      <!-- MR Section -->
+      <div class="section-title">For Field MRs</div>
+      <div class="buttons">
+        <a href="/authenticate" class="btn btn-primary">🔍 Authenticate</a>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Admin Section -->
+      <div class="section-title">For Admin Only</div>
+      <div class="buttons">
+        <a href="/login?next=enroll" class="btn btn-secondary"
+          >👤 Enroll New MR</a
+        >
+        <a href="/login?next=dashboard" class="btn btn-admin">📊 Dashboard</a>
+      </div>
+      <p class="admin-note">Admin login required</p>
+    </div>
+  </body>
+</html>

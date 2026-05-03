@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Authenticate</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #0f0f1a;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 30px;
+      }
+      h2 {
+        color: #00e5ff;
+        margin-bottom: 10px;
+        font-size: 1.8rem;
+      }
+      p.sub {
+        color: #aaa;
+        margin-bottom: 20px;
+      }
+      .feed-container {
+        border: 3px solid #00e5ff;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      img {
+        display: block;
+        width: 640px;
+        max-width: 100%;
+      }
+      .info-box {
+        margin-top: 20px;
+        background: #1a1a2e;
+        padding: 20px 40px;
+        border-radius: 12px;
+        display: flex;
+        gap: 40px;
+        text-align: center;
+      }
+      .info-item label {
+        color: #aaa;
+        font-size: 0.85rem;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .info-item span {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #00e5ff;
+      }
+      #status {
+        margin-top: 15px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        min-height: 30px;
+      }
+      #instruction {
+        margin-top: 10px;
+        color: #aaa;
+        font-size: 0.9rem;
+      }
+      a {
+        color: #aaa;
+        margin-top: 20px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🔍 Live Authentication</h2>
+    <p class="sub">
+      Look at camera → wait for your name → then <strong>blink</strong>
+    </p>
+
+    <div class="feed-container">
+      <img src="/video_feed" alt="Camera Feed" />
+    </div>
+
+    <div class="info-box">
+      <div class="info-item">
+        <label>Detected Name</label>
+        <span id="name">Scanning...</span>
+      </div>
+      <div class="info-item">
+        <label>Liveness</label>
+        <span id="blink">Waiting...</span>
+      </div>
+    </div>
+
+    <div id="status"></div>
+    <p id="instruction">👀 Please look directly at the camera</p>
+    <a href="/">← Back to Home</a>
+
+    <script>
+      let polling = false;
+      let redirecting = false;
+
+      // wait 2s before polling so reset clears properly
+      setTimeout(() => {
+        polling = true;
+      }, 2000);
+
+      setInterval(() => {
+        if (!polling || redirecting) return;
+
+        fetch("/result")
+          .then((r) => r.json())
+          .then((data) => {
+            document.getElementById("name").textContent = data.name;
+
+            // Update blink indicator
+            const blinkEl = document.getElementById("blink");
+            if (data.blink) {
+              blinkEl.textContent = "Blink detected ✓";
+              blinkEl.style.color = "#00ff88";
+            } else {
+              blinkEl.textContent = "Waiting...";
+              blinkEl.style.color = "#00e5ff";
+            }
+
+            // Update instruction
+            const unknownStates = [
+              "Scanning...",
+              "No face detected",
+              "Unknown",
+              "Multiple faces detected",
+              "Not trained yet",
+            ];
+            const instruction = document.getElementById("instruction");
+            if (unknownStates.includes(data.name)) {
+              instruction.textContent = "👀 Please look directly at the camera";
+            } else {
+              instruction.textContent =
+                "😉 Face detected! Blink naturally to authenticate";
+            }
+
+            // Handle redirect on success
+            if (data.status === "SUCCESS" && data.authenticated === true) {
+              redirecting = true;
+              document.getElementById("status").textContent =
+                "✅ Authenticated! Redirecting...";
+              document.getElementById("status").style.color = "#00ff88";
+              // Send location then redirect
+              sendLocation().then(() => {
+                setTimeout(() => {
+                  window.location.href = "/success";
+                }, 1000);
+              });
+            } else if (data.status === "FAILED") {
+              document.getElementById("status").textContent =
+                "❌ Authentication Failed - Try again";
+              document.getElementById("status").style.color = "#ff4444";
+            }
+          })
+          .catch((err) => console.log("Fetch error:", err));
+      }, 500);
+
+      // ── Location capture ──
+      let userLocation = null;
+      let locationAddress = "N/A";
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            userLocation = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            };
+            try {
+              const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${userLocation.latitude}&lon=${userLocation.longitude}&format=json`,
+              );
+              const locData = await res.json();
+              locationAddress = locData.display_name || "N/A";
+            } catch {
+              locationAddress = `${userLocation.latitude}, ${userLocation.longitude}`;
+            }
+          },
+          () => {
+            userLocation = null;
+          },
+        );
+      }
+
+      async function sendLocation() {
+        if (!userLocation) return;
+        try {
+          await fetch("/log_location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+              address: locationAddress,
+            }),
+          });
+        } catch (e) {
+          console.log("Location error:", e);
+        }
+      }
+    </script>
+  </body>
+</html>

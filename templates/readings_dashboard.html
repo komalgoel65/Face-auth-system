@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Meter Readings</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #0f0f1a;
+        color: white;
+        padding: 30px;
+      }
+      h2 {
+        color: #00e5ff;
+        margin-bottom: 25px;
+      }
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #1a1a2e;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      th {
+        background: #00e5ff;
+        color: #0f0f1a;
+        padding: 12px 14px;
+        text-align: left;
+        font-size: 0.85rem;
+      }
+      td {
+        padding: 11px 14px;
+        border-bottom: 1px solid #2a2a3e;
+        font-size: 0.85rem;
+      }
+      tr:hover {
+        background: #2a2a3e;
+      }
+      .mr-id {
+        color: #00e5ff;
+        font-family: monospace;
+      }
+      .units {
+        color: #00ff88;
+        font-weight: bold;
+      }
+      .empty {
+        text-align: center;
+        padding: 40px;
+        color: #aaa;
+      }
+      a.back {
+        color: #aaa;
+        text-decoration: none;
+      }
+      .btn-export {
+        background: #00ff88;
+        color: #0f0f1a;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .photo-thumb {
+        width: 50px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <a class="back" href="/dashboard">← Back to Dashboard</a>
+      <a class="btn-export" href="/export_readings_csv">⬇️ Export CSV</a>
+    </div>
+    <h2>⚡ Meter Reading Records</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>MR Name</th>
+          <th>MR ID</th>
+          <th>Consumer ID</th>
+          <th>Consumer Name</th>
+          <th>Previous</th>
+          <th>Current</th>
+          <th>Units</th>
+          <th>Timestamp</th>
+          <th>Location</th>
+          <th>Photo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if readings %} {% for r in readings %}
+        <tr>
+          <td>{{ r[0] }}</td>
+          <td>{{ r[1].replace('_',' ') if r[1] else '' }}</td>
+          <td class="mr-id">{{ r[2] }}</td>
+          <td>{{ r[3] }}</td>
+          <td>{{ r[4] }}</td>
+          <td>{{ r[5] }}</td>
+          <td>{{ r[6] }}</td>
+          <td class="units">{{ r[7] }}</td>
+          <td>{{ r[9] }}</td>
+          <td style="font-size: 0.75rem; color: #aaa">{{ r[10] }}</td>
+          <td>
+            {% if r[8] %}
+            <img
+              src="/static/meter_photos/{{ r[8] }}"
+              class="photo-thumb"
+              onclick="window.open(this.src)"
+              title="Click to view"
+            />
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td colspan="11" class="empty">No readings yet!</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </body>
+</html>

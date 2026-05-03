@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Enroll Person</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #0f0f1a;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .card {
+        background: #1a1a2e;
+        padding: 30px;
+        border-radius: 15px;
+        width: 600px;
+        text-align: center;
+      }
+      h2 {
+        color: #00e5ff;
+        margin-bottom: 20px;
+      }
+      input[type="text"],
+      select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        background: #0f0f1a;
+        color: white;
+        font-size: 1rem;
+      }
+      select option {
+        background: #0f0f1a;
+      }
+      video {
+        border-radius: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      .btn {
+        padding: 12px 25px;
+        border-radius: 8px;
+        border: none;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .btn-capture {
+        background: #00e5ff;
+        color: #0f0f1a;
+      }
+      .btn-enroll {
+        background: #00ff88;
+        color: #0f0f1a;
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+      }
+      .btn-enroll:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+      }
+      .btn-clear {
+        background: #ff4444;
+        color: white;
+      }
+      .preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin: 10px 0;
+      }
+      .preview-container img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #00e5ff;
+      }
+      p.hint {
+        color: #aaa;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+      }
+      #count {
+        color: #00ff88;
+        font-weight: bold;
+      }
+      #message {
+        margin-top: 15px;
+        color: #00ff88;
+      }
+      a {
+        color: #aaa;
+        display: block;
+        margin-top: 15px;
+        text-decoration: none;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .row input {
+        flex: 1;
+      }
+      label {
+        display: block;
+        text-align: left;
+        color: #aaa;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>👤 Enroll New MR</h2>
+
+      <label>Full Name</label>
+      <input
+        type="text"
+        id="nameInput"
+        placeholder="e.g. Komal Goel"
+        required
+      />
+
+      <div class="row">
+        <div style="flex: 1">
+          <label>MR Employee ID</label>
+          <input type="text" id="mrId" placeholder="e.g. MR-2024-001" />
+        </div>
+        <div style="flex: 1">
+          <label>Region</label>
+          <select id="region">
+            <option value="">Select Region</option>
+            <option>Mumbai North</option>
+            <option>Mumbai South</option>
+            <option>Delhi NCR</option>
+            <option>Bangalore</option>
+            <option>Chennai</option>
+            <option>Hyderabad</option>
+            <option>Pune</option>
+            <option>Kolkata</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Capture Face Photos</label>
+      <video id="video" autoplay playsinline></video>
+
+      <p class="hint">
+        Captured: <span id="count">0</span> photos (minimum 5 needed)
+      </p>
+      <div class="preview-container" id="previews"></div>
+
+      <div>
+        <button class="btn btn-capture" onclick="capturePhoto()">
+          📸 Capture Photo
+        </button>
+        <button class="btn btn-clear" onclick="clearPhotos()">🗑 Clear</button>
+      </div>
+
+      <button
+        class="btn btn-enroll"
+        id="enrollBtn"
+        onclick="enrollPerson()"
+        disabled
+      >
+        ✅ Enroll & Train Model
+      </button>
+
+      <div id="message"></div>
+      <a href="/">← Back to Home</a>
+    </div>
+
+    <script>
+      let capturedPhotos = [];
+      const video = document.getElementById("video");
+
+      // Release Flask camera first, then open browser camera
+      fetch("/release_camera")
+        .then(() => {
+          return navigator.mediaDevices.getUserMedia({ video: true });
+        })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((err) => {
+          alert("Camera error: " + err);
+        });
+
+      function capturePhoto() {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        const dataUrl = canvas.toDataURL("image/jpeg");
+        capturedPhotos.push(dataUrl);
+
+        const img = document.createElement("img");
+        img.src = dataUrl;
+        document.getElementById("previews").appendChild(img);
+        document.getElementById("count").textContent = capturedPhotos.length;
+
+        if (capturedPhotos.length >= 5) {
+          document.getElementById("enrollBtn").disabled = false;
+        }
+      }
+
+      function clearPhotos() {
+        capturedPhotos = [];
+        document.getElementById("previews").innerHTML = "";
+        document.getElementById("count").textContent = "0";
+        document.getElementById("enrollBtn").disabled = true;
+      }
+
+      async function enrollPerson() {
+        const name = document.getElementById("nameInput").value.trim();
+        const mrId = document.getElementById("mrId").value.trim();
+        const region = document.getElementById("region").value;
+
+        if (!name) {
+          alert("Please enter a name!");
+          return;
+        }
+        if (!mrId) {
+          alert("Please enter MR Employee ID!");
+          return;
+        }
+        if (!region) {
+          alert("Please select a region!");
+          return;
+        }
+        if (capturedPhotos.length < 5) {
+          alert("Please capture at least 5 photos!");
+          return;
+        }
+
+        document.getElementById("message").textContent =
+          "⏳ Training model, please wait...";
+        document.getElementById("enrollBtn").disabled = true;
+
+        const response = await fetch("/enroll_webcam", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name,
+            mr_id: mrId,
+            region: region,
+            photos: capturedPhotos,
+          }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          document.getElementById("message").textContent =
+            "✅ Enrolled successfully! Redirecting...";
+          // Stop browser camera and give it back to Flask
+          video.srcObject.getTracks().forEach((track) => track.stop());
+          await fetch("/reacquire_camera");
+          setTimeout(() => {
+            window.location.href = "/authenticate";
+          }, 1500);
+        } else {
+          document.getElementById("message").textContent =
+            "❌ Error: " + result.error;
+          document.getElementById("enrollBtn").disabled = false;
+        }
+      }
+    </script>
+  </body>
+</html>
