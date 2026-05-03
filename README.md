@@ -20,11 +20,12 @@ A real-time face recognition and liveness detection web application built for **
 
 ### Dashboard
 
-![Dashboard](screenshots/Dashboards)
+![Dashboard](screenshots/Dashboards/dashboard.png)
+![Dashboard](screenshots/Dashboards/dashboard2.png)
 
 ### Meter Reading Form
 
-![Meter Reading](screenshots/meter_reading.png)
+![Meter Reading](screenshots/Meter_reading.png)
 
 ---
 
